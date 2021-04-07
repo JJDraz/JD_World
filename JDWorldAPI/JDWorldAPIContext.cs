@@ -9,5 +9,8 @@ namespace JDWorldAPI
     {
         public JDWorldAPIContext(DbContextOptions options)
             : base(options) { }
+
+        public DbSet<WorldDto> Worlds { get; set; }
+
     }
 }
