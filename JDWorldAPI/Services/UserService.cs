@@ -71,18 +71,15 @@ namespace JDWorldAPI.Services
 
         public async Task<PagedResults<UserRest>> GetUserCollectionAsync(
             PagingOptions pagingOptions,
-            string userName,
+            string tenantName,
             CancellationToken ct)
         {
-            var tenantInfo = _userManager.Users.FirstOrDefault(c => c.UserName == userName).TenantName;
-
-            string[] Search = new string[1];
-            Search[0] = "tenantName eq " + tenantInfo;
+            var Search = new string[1];
+            Search[0] = "tenantName eq " + tenantName;
 
             var tenant = new SearchOptionsProcessor<UserRest, UserDto>(Search);
             
             IQueryable<UserDto> query = _userManager.Users;
-            // query = searchOptions.Apply(query);
             query = tenant.Apply(query);
 
             var size = await query.CountAsync(ct);

@@ -13,7 +13,7 @@ namespace JDWorldAPI.Services
     {
         Task<PagedResults<UserRest>> GetUserCollectionAsync(
             PagingOptions pagingOptions,
-            string userName,
+            string tenantName,
             CancellationToken ct);
 
         Task<(bool Succeeded, string Error)> CreateUserAsync(RegisterForm form);

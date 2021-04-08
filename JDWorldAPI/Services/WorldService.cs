@@ -9,6 +9,7 @@ using System;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
+using System.Collections.Generic;
 
 namespace JDWorldAPI.Services
 {
@@ -33,16 +34,38 @@ namespace JDWorldAPI.Services
 
         public async Task<PagedResults<WorldRest>> GetWorldCollectionAsync(
             PagingOptions pagingOptions,
+            bool allWorlds,
+            string userEmail,
             string tenantName,
             CancellationToken ct)
         {
-            var Search = new string[1];
-            Search[0] = "tenantName eq " + tenantName;
 
-            var tenant = new SearchOptionsProcessor<WorldRest, WorldDto>(Search);
+            IQueryable<WorldDto> query;
 
-            IQueryable<WorldDto> query = _context.Worlds;
-            query = tenant.Apply(query);
+            if (allWorlds)
+            {
+                var Search = new string[1];
+                Search[0] = "tenantName eq " + tenantName;
+
+                var tenant = new SearchOptionsProcessor<WorldRest, WorldDto>(Search);
+
+                query = _context.Worlds;
+                query = tenant.Apply(query);
+            } else {
+
+                var allResidents = await _context.Residents.ToArrayAsync(ct);
+                var validWorlds = new List<string>();
+
+                foreach (var resident in allResidents)
+                {
+                    bool worldCitizen = resident.WorldUserEmail.Equals(userEmail, StringComparison.OrdinalIgnoreCase);
+                    if (worldCitizen)
+                    {
+                        validWorlds.Add(resident.WorldName);
+                    }
+                }
+                query = _context.Worlds.Where(r => validWorlds.Any(s => r.WorldName.Equals(s)));
+            }
 
             var size = await query.CountAsync(ct);
 

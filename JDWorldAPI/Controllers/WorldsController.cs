@@ -2,10 +2,7 @@
 using JDWorldAPI.Services;
 using JD_Hateoas.Models;
 using JD_Hateoas.Etag;
-using JD_Hateoas.Form;
 using JD_Hateoas.Paging;
-using JD_Hateoas.Search;
-using JD_Hateoas.Sort;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Options;
@@ -24,17 +21,20 @@ namespace JDWorldAPI.Controllers
         private readonly IWorldService _worldService;
         private readonly IResidentService _residentService;
         private readonly IUserService _userService;
+        private readonly IAuthorizationService _authzService;
         private readonly PagingOptions _defaultPagingOptions;
 
         public WorldsController(
             IWorldService worldService,
             IResidentService residentService,
             IUserService userService,
+            IAuthorizationService authzService,
             IOptions<PagingOptions> defaultPagingOptionsAccessor)
         {
             _worldService = worldService;
             _residentService = residentService;
             _userService = userService;
+            _authzService = authzService;
             _defaultPagingOptions = defaultPagingOptionsAccessor.Value;
         }
 
@@ -42,7 +42,6 @@ namespace JDWorldAPI.Controllers
         [HttpGet(Name = nameof(GetWorldsAsync))]
         public async Task<IActionResult> GetWorldsAsync(
             [FromQuery] PagingOptions pagingOptions,
-            string tenantName,
             CancellationToken ct)
         {
             if (!ModelState.IsValid) return BadRequest(new ApiError(ModelState));
@@ -50,11 +49,17 @@ namespace JDWorldAPI.Controllers
             pagingOptions.Offset = pagingOptions.Offset ?? _defaultPagingOptions.Offset;
             pagingOptions.Limit = pagingOptions.Limit ?? _defaultPagingOptions.Limit;
 
-            var user = await _userService.GetUserAsync(User);
-            var tenantInfo = user.TenantName;
+            var canViewAllWorlds = await _authzService.AuthorizeAsync(User, "ViewAllWorldsPolicy");
+            bool allWorlds;
 
+            if (canViewAllWorlds.Succeeded) allWorlds = true;
+            else allWorlds = false;
+            
+            var user = await _userService.GetUserAsync(User);
             var worlds = await _worldService.GetWorldCollectionAsync(
                 pagingOptions,
+                allWorlds,
+                user.Email,
                 user.TenantName,
                 ct);
 
@@ -96,14 +101,25 @@ namespace JDWorldAPI.Controllers
         {
             if (!ModelState.IsValid) return BadRequest(new ApiError(ModelState));
 
-            var userId = await _userService.GetUserIdAsync(User);
-            if (userId == null) return Unauthorized();
-           
+            var user = await _userService.GetUserAsync(User);
+            if (user == null) return Unauthorized();
+
             var world = await _worldService.GetWorldAsync(worldId, ct);
             if (world == null) return NotFound();
 
+            var canRegisterUser = await _authzService.AuthorizeAsync(User, "RegisterUsersPolicy");
+
+            if (!canRegisterUser.Succeeded)
+            {
+                var canRegisterInWorld = await _residentService.IsResidentWorldAdminAsync(user.Email, world.WorldName, ct);
+                if (!canRegisterInWorld)
+                {
+                    return Unauthorized();
+                }
+            }
+
             var residentId = await _residentService.CreateResidentAsync(
-                (Guid) userId, worldId, form.WorldUserRole, form.WorldUser, ct);
+               world.WorldName, form.WorldUserRole, form.WorldUserEmail, ct);
 
             return Created(
                 Url.Link(nameof(ResidentsController.GetResidentByIdAsync),

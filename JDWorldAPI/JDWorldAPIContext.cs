@@ -12,5 +12,6 @@ namespace JDWorldAPI
 
         public DbSet<WorldDto> Worlds { get; set; }
 
+        public DbSet<ResidentDto> Residents { get; set; }
     }
 }

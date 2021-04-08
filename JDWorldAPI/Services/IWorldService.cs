@@ -16,6 +16,8 @@ namespace JDWorldAPI.Services
 
         Task<PagedResults<WorldRest>> GetWorldCollectionAsync(
             PagingOptions pagingOptions,
+            bool allWorlds,
+            string userEmail,
             string tenantName,
             CancellationToken ct);
     }

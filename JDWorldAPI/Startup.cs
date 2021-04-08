@@ -183,6 +183,7 @@ namespace JDWorldAPI
 
             // Inject data services
             services.AddScoped<IWorldService, WorldService>();
+            services.AddScoped<IResidentService, ResidentService>();
             services.AddScoped<IUserService, UserService>();
 
             services.AddAuthorization(opt =>
@@ -194,6 +195,9 @@ namespace JDWorldAPI
                     p => p.RequireAuthenticatedUser().RequireRole("TenantAdmin"));
 
                 opt.AddPolicy("ViewAllResidentsPolicy",
+                    p => p.RequireAuthenticatedUser().RequireRole("TenantAdmin"));
+
+                opt.AddPolicy("ViewAllWorldsPolicy",
                     p => p.RequireAuthenticatedUser().RequireRole("TenantAdmin"));
             });
         }
@@ -261,7 +265,7 @@ namespace JDWorldAPI
             await roleManager.CreateAsync(new UserRoleDto("User"));
 
             // ==================                    =====================
-            // ==================  WASHINGTON TENANT =====================
+            // ==================  WASHINGTON USERS  =====================
             // ==================                    =====================
 
             // Add Tenant Admin User to WASHINGTON Tenant
@@ -367,7 +371,7 @@ namespace JDWorldAPI
             await userManager.UpdateAsync(user);
 
             // ==================               =====================
-            // ==================  ADAMS TENANT =====================
+            // ==================  ADAMS USERS  =====================
             // ==================               =====================
 
             // Add Tenant Admin User to ADAMS Tenant
@@ -422,7 +426,7 @@ namespace JDWorldAPI
             await userManager.UpdateAsync(user);
 
             // ==================                   =====================
-            // ==================  JEFFERSON TENANT =====================
+            // ==================  JEFFERSON USERS  =====================
             // ==================                   =====================
 
             // Add Tenant Admin User to ADAMS Tenant
@@ -441,7 +445,6 @@ namespace JDWorldAPI
             // Put the user in the admin role
             await userManager.AddToRoleAsync(user, "TenantAdmin");
             await userManager.UpdateAsync(user);
-
         }
 
 
@@ -454,16 +457,21 @@ namespace JDWorldAPI
             JDWorldAPIContext context,
             UserManager<UserDto> userManager)
         {
-            context.Worlds.Add(new WorldDto
+
+            // ==================                    =====================
+            // ==================  WASHINGTON WORLDS =====================
+            // ==================                    =====================
+
+            var wrld_wash1 = context.Worlds.Add(new WorldDto
             {
                 Id = Guid.Parse("ee2b83be-91db-4de5-8122-35a9e9195976"),
                 WorldName = "Wild West",
                 TenantName = "WASHINGTON",
                 ServerIP = "151.122.1.1",
                 VoiceIP = "151.122.2.1"
-            });
+            }).Entity;
 
-            var ps2 = context.Worlds.Add(new WorldDto
+            var wrld_wash2 = context.Worlds.Add(new WorldDto
             {
                 Id = Guid.Parse("804c64e3-9bfa-4ca0-8300-33960b11a55c"),
                 WorldName = "Wellington",
@@ -472,52 +480,52 @@ namespace JDWorldAPI
                 VoiceIP = "151.122.2.2"
             }).Entity;
 
-            context.Worlds.Add(new WorldDto
+            var wrld_wash3 = context.Worlds.Add(new WorldDto
             {
                 Id = Guid.Parse("8035be4e-eeea-46a2-b828-c4218df34757"),
                 WorldName = "Wilson Athletic",
                 TenantName = "WASHINGTON",
                 ServerIP = "151.122.1.3",
                 VoiceIP = "151.122.2.3"
-            });
+            }).Entity;
 
-            context.Worlds.Add(new WorldDto
+            var wrld_wash4 = context.Worlds.Add(new WorldDto
             {
                 Id = Guid.Parse("c9008f7e-0a9c-47d3-8e4a-f0247634870e"),
                 WorldName = "Wilcox Electric",
                 TenantName = "WASHINGTON",
                 ServerIP = "151.122.1.4",
                 VoiceIP = "151.122.2.4"
-            });
+            }).Entity;
 
-            context.Worlds.Add(new WorldDto
+            var wrld_wash5 = context.Worlds.Add(new WorldDto
             {
                 Id = Guid.Parse("61406e2d-2d22-46e2-a2ff-92ebc4345a25"),
                 WorldName = "Walking Footwear",
                 TenantName = "WASHINGTON",
                 ServerIP = "151.122.1.5",
                 VoiceIP = "151.122.2.5"
-            });
+            }).Entity;
 
-            context.Worlds.Add(new WorldDto
+            var wrld_wash6 = context.Worlds.Add(new WorldDto
             {
                 Id = Guid.Parse("daf9a15b-e144-46af-8dec-d1b3de493d58"),
                 WorldName = "Willies Bar",
                 TenantName = "WASHINGTON",
                 ServerIP = "151.122.1.6",
                 VoiceIP = "151.122.2.6"
-            });
+            }).Entity;
 
-            context.Worlds.Add(new WorldDto
+            var wrld_wash7 = context.Worlds.Add(new WorldDto
             {
                 Id = Guid.Parse("95020f7b-b43f-4b7f-a644-4c2c81a54291"),
                 WorldName = "Weather Proofers",
                 TenantName = "WASHINGTON",
                 ServerIP = "151.122.1.7",
                 VoiceIP = "151.122.2.7"
-            });
+            }).Entity;
 
-            var ps8 = context.Worlds.Add(new WorldDto
+            var wrld_wash8 = context.Worlds.Add(new WorldDto
             {
                 Id = Guid.Parse("6ba9fe54-6394-447b-bb80-66f65f379782"),
                 WorldName = "Wide Lens Crafters",
@@ -526,25 +534,25 @@ namespace JDWorldAPI
                 VoiceIP = "151.122.2.8"
             }).Entity;
 
-            context.Worlds.Add(new WorldDto
+            var wrld_wash9 = context.Worlds.Add(new WorldDto
             {
                 Id = Guid.Parse("90d81ae9-bfdf-48ca-9476-8802f4e4bcd2"),
                 WorldName = "Wonder World",
                 TenantName = "WASHINGTON",
                 ServerIP = "151.122.1.9",
                 VoiceIP = "151.122.2.9"
-            });
+            }).Entity;
 
-            context.Worlds.Add(new WorldDto
+            var wrld_wash10 = context.Worlds.Add(new WorldDto
             {
                 Id = Guid.Parse("ec260967-0caf-4a88-b3b1-9a12eba392d0"),
                 WorldName = "Waiters Wear",
                 TenantName = "WASHINGTON",
                 ServerIP = "151.122.1.10",
                 VoiceIP = "151.122.2.10"
-            });
+            }).Entity;
 
-            var ps11 = context.Worlds.Add(new WorldDto
+            var wrld_wash11 = context.Worlds.Add(new WorldDto
             {
                 Id = Guid.Parse("406d2ef2-40d3-42e6-b188-53a726930154"),
                 WorldName = "Wassup",
@@ -553,34 +561,34 @@ namespace JDWorldAPI
                 VoiceIP = "151.122.2.11"
             }).Entity;
 
-            context.Worlds.Add(new WorldDto
+            var wrld_wash12 = context.Worlds.Add(new WorldDto
             {
                 Id = Guid.Parse("31ffb2a5-8504-4a8c-8a12-d2c37ced95ec"),
                 WorldName = "White Whale Fishing",
                 TenantName = "WASHINGTON",
                 ServerIP = "151.122.1.12",
                 VoiceIP = "151.122.2.12"
-            });
+            }).Entity;
 
-            context.Worlds.Add(new WorldDto
+            var wrld_wash13 = context.Worlds.Add(new WorldDto
             {
                 Id = Guid.Parse("a280c64e-8514-44e8-976b-caa27e0e61d2"),
                 WorldName = "Winter Jackets",
                 TenantName = "WASHINGTON",
                 ServerIP = "151.122.1.13",
                 VoiceIP = "151.122.2.13"
-            });
+            }).Entity;
 
-            context.Worlds.Add(new WorldDto
+            var wrld_wash14 = context.Worlds.Add(new WorldDto
             {
                 Id = Guid.Parse("301df04d-8679-4b1b-ab92-0a586ae53d08"),
                 WorldName = "Whitmore Services",
                 TenantName = "WASHINGTON",
                 ServerIP = "151.122.1.14",
                 VoiceIP = "151.122.2.14"
-            });
+            }).Entity;
 
-            var ps15 = context.Worlds.Add(new WorldDto
+            var wrld_wash15 = context.Worlds.Add(new WorldDto
             {
                 Id = Guid.Parse("cdb038f0-549c-42e5-8993-09f26b79ff7b"),
                 WorldName = "Websters Dictionary",
@@ -589,25 +597,29 @@ namespace JDWorldAPI
                 VoiceIP = "151.122.2.15"
             }).Entity;
 
-            context.Worlds.Add(new WorldDto
+            var wrld_wash16 = context.Worlds.Add(new WorldDto
             {
                 Id = Guid.Parse("261f5861-2189-4ab9-b3a7-191df7877dac"),
                 WorldName = "Wonka Bars",
                 TenantName = "WASHINGTON",
                 ServerIP = "151.122.1.16",
                 VoiceIP = "151.122.2.16"
-            });
+            }).Entity;
 
-            context.Worlds.Add(new WorldDto
+            var wrld_wash17 = context.Worlds.Add(new WorldDto
             {
                 Id = Guid.Parse("e84bd49e-28e0-4baa-9864-2947025fb253"),
                 WorldName = "Wonka Bars",
                 TenantName = "WASHINGTON",
                 ServerIP = "151.122.1.16",
                 VoiceIP = "151.122.2.16"
-            });
+            }).Entity;
 
-            var ps18 = context.Worlds.Add(new WorldDto
+            // ==================               =====================
+            // ==================  ADAMS WORLDS =====================
+            // ==================               =====================
+
+            var wrld_adam1 = context.Worlds.Add(new WorldDto
             {
                 Id = Guid.Parse("55174804-9993-4712-a271-eb3c907cdc48"),
                 WorldName = "Argent Energy",
@@ -616,52 +628,56 @@ namespace JDWorldAPI
                 VoiceIP = "151.123.2.1"
             }).Entity;
 
-            context.Worlds.Add(new WorldDto
+            var wrld_adam2 = context.Worlds.Add(new WorldDto
             {
                 Id = Guid.Parse("861e5218-e055-4abb-a7b2-4cdc9113cb54"),
                 WorldName = "Anderson Little",
                 TenantName = "ADAMS",
                 ServerIP = "151.123.1.2",
                 VoiceIP = "151.123.2.2"
-            });
+            }).Entity;
 
-            context.Worlds.Add(new WorldDto
+            var wrld_adam3 = context.Worlds.Add(new WorldDto
             {
                 Id = Guid.Parse("ace927e1-650b-52f6-7882-3bcb8222ba43"),
                 WorldName = "Aspen Dental",
                 TenantName = "ADAMS",
                 ServerIP = "151.123.1.3",
                 VoiceIP = "151.123.2.3"
-            });
+            }).Entity;
 
-            context.Worlds.Add(new WorldDto
+            var wrld_adam4 = context.Worlds.Add(new WorldDto
             {
                 Id = Guid.Parse("29949379-a2dc-4cf6-87f7-aba707dbf985"),
                 WorldName = "Atwater Tackle",
                 TenantName = "ADAMS",
                 ServerIP = "151.123.1.4",
                 VoiceIP = "151.123.2.4"
-            });
+            }).Entity;
 
-            context.Worlds.Add(new WorldDto
+            var wrld_adam5 = context.Worlds.Add(new WorldDto
             {
                 Id = Guid.Parse("469afb80-3bba-43c6-943d-bafe665eee5c"),
                 WorldName = "Amber Paints",
                 TenantName = "ADAMS",
                 ServerIP = "151.123.1.5",
                 VoiceIP = "151.123.2.5"
-            });
+            }).Entity;
 
-            context.Worlds.Add(new WorldDto
+            var wrld_adam6 = context.Worlds.Add(new WorldDto
             {
                 Id = Guid.Parse("4bc0c42d-e18f-4d00-91e2-b3c430c6c47c"),
                 WorldName = "Acker Packers",
                 TenantName = "ADAMS",
                 ServerIP = "151.123.1.6",
                 VoiceIP = "151.123.2.6"
-            });
+            }).Entity;
 
-            context.Worlds.Add(new WorldDto
+            // ==================                   =====================
+            // ==================  JEFFERSON WORLDS =====================
+            // ==================                   =====================
+
+            var wrld_jeff = context.Worlds.Add(new WorldDto
             {
                 Id = Guid.Parse("7cd1d53d-f001-004d-e291-c47cb3c430c6"),
                 WorldName = "Just Another World",
@@ -670,6 +686,68 @@ namespace JDWorldAPI
                 VoiceIP = "151.124.2.1"
             });
 
+            var washUser1 = userManager.Users.SingleOrDefault(u => u.Email == "WRipple@washington.com");
+            var washUser2 = userManager.Users.SingleOrDefault(u => u.Email == "WWilson@washington.com");
+            var adamUser1 = userManager.Users.SingleOrDefault(u => u.Email == "AApple@adams.com");
+            var adamUser2 = userManager.Users.SingleOrDefault(u => u.Email == "ACousins@adams.com");
+
+            // ==================                       =====================
+            // ==================  WASHINGTON RESIDENTS =====================
+            // ==================                       =====================
+
+            context.Residents.Add(new ResidentDto
+            {
+                Id = Guid.Parse("2eac8dea-2749-42b3-9d21-8eb2fc0fd6bd"),
+                WorldName = wrld_wash1.WorldName,
+                CreatedAt = DateTimeOffset.UtcNow,
+                ModifiedAt = DateTimeOffset.UtcNow,
+                WorldRole = "WorldAdmin",
+                WorldUserEmail = washUser1.Email
+            });
+
+            context.Residents.Add(new ResidentDto
+            {
+                Id = Guid.Parse("58423b3e-18c0-453d-859d-17e74ceb2a7b"),
+                WorldName = wrld_wash1.WorldName,
+                CreatedAt = DateTimeOffset.UtcNow,
+                ModifiedAt = DateTimeOffset.UtcNow,
+                WorldRole = "Citizen",
+                WorldUserEmail = washUser2.Email
+            });
+
+            context.Residents.Add(new ResidentDto
+            {
+                Id = Guid.Parse("a8682418-1163-485c-b9ef-c800dc959147"),
+                WorldName = wrld_wash2.WorldName,
+                CreatedAt = DateTimeOffset.UtcNow,
+                ModifiedAt = DateTimeOffset.UtcNow,
+                WorldRole = "WorldAdmin",
+                WorldUserEmail = washUser2.Email
+            });
+
+            // ==================                  =====================
+            // ==================  ADAMS RESIDENTS =====================
+            // ==================                  =====================
+
+            context.Residents.Add(new ResidentDto
+            {
+                Id = Guid.Parse("b143337e-5e5f-487b-943f-4aa047d0be7d"),
+                WorldName = wrld_adam1.WorldName,
+                CreatedAt = DateTimeOffset.UtcNow,
+                ModifiedAt = DateTimeOffset.UtcNow,
+                WorldRole = "Citizen",
+                WorldUserEmail = adamUser1.Email
+            });
+
+            context.Residents.Add(new ResidentDto
+            {
+                Id = Guid.Parse("8b3053e2-2172-474a-b74c-030b47a3d849"),
+                WorldName = wrld_adam2.WorldName,
+                CreatedAt = DateTimeOffset.UtcNow,
+                ModifiedAt = DateTimeOffset.UtcNow,
+                WorldRole = "WorldAdmin",
+                WorldUserEmail = adamUser2.Email
+            });
 
             context.SaveChanges();
         }

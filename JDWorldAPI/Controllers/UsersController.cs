@@ -46,13 +46,14 @@ namespace JDWorldAPI.Controllers
 
             if (User.Identity.IsAuthenticated)
             {
-                var userName = User.Claims.FirstOrDefault(c => c.Type == "name").Value;
+                var user = await _userService.GetUserAsync(User);
+                
                 var canSeeEveryone = await _authzService
                     .AuthorizeAsync(User, "ViewAllUsersPolicy");
                 if (canSeeEveryone.Succeeded)
                 {
                     users = await _userService.GetUserCollectionAsync(
-                        pagingOptions, userName, ct);
+                        pagingOptions, user.TenantName, ct);
                 }
                 else
                 {
@@ -77,7 +78,6 @@ namespace JDWorldAPI.Controllers
             return Ok(collection);
         }
 
-        //[Authorize]
         [Authorize(AuthenticationSchemes = OpenIddict.Validation.AspNetCore.OpenIddictValidationAspNetCoreDefaults.AuthenticationScheme)]
         [HttpGet("me", Name = nameof(GetMeAsync))]
         public async Task<IActionResult> GetMeAsync(CancellationToken ct)
@@ -97,6 +97,10 @@ namespace JDWorldAPI.Controllers
             CancellationToken ct)
         {
             if (!ModelState.IsValid) return BadRequest(new ApiError(ModelState));
+
+            var canRegisterUser = await _authzService.AuthorizeAsync(User, "RegisterUsersPolicy");
+            if (!canRegisterUser.Succeeded) return Unauthorized();
+
 
             var (succeeded, error) = await _userService.CreateUserAsync(form);
             if (succeeded) return Created(Url.Link(nameof(GetMeAsync), null), null);

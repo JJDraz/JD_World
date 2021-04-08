@@ -23,9 +23,11 @@
     <PackageReference Include="OpenIddict.Validation" Version="3.0.2" />
     <PackageReference Include="OpenIddict.Validation.AspNetCore" Version="3.0.2" />
     <PackageReference Include="Swashbuckle.AspNetCore" Version="5.6.3" />
+
   </ItemGroup>
 
   <ItemGroup>
     <ProjectReference Include="..\JD_Hateoas\JD_Hateoas.csproj" />
   </ItemGroup>
+
 </Project>
