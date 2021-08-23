@@ -34,7 +34,7 @@ namespace JDWorldAPI.Controllers
         public async Task<IActionResult> TokenExchangeAsync([FromForm]
             OpenIdConnectRequest tokenRequest)
         {
-            tokenRequest.GrantType = "password";      // THIS IS A HACK - grant_type not picked up in the header :(
+/*            tokenRequest.GrantType = "password";      // THIS IS A HACK - grant_type not picked up in the header :(
             if (!tokenRequest.IsPasswordGrantType()) 
             {
                 return BadRequest(new OpenIdConnectResponse
@@ -43,7 +43,7 @@ namespace JDWorldAPI.Controllers
                     ErrorDescription = "The specified grant type is not supported."
                 });
             }
-
+*/
             var user = await _userManager.FindByNameAsync(tokenRequest.Username);
             if (user == null)
             {

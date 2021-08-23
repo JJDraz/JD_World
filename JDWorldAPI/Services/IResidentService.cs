@@ -39,5 +39,13 @@ namespace JDWorldAPI.Services
             Guid userId,
             PagingOptions pagingOptions,
             CancellationToken ct);
+
+        // Ooops. Forgot Update Sample
+        Task UpdateResidentRoleAsync(
+            Guid residentId,
+            string worldUserRole,
+            CancellationToken ct);
+
+
     }
 }

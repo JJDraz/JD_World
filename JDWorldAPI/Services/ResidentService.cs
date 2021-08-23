@@ -164,5 +164,23 @@ namespace JDWorldAPI.Services
             };
         }
 
+        // Ooops forgot Update
+        public async Task UpdateResidentRoleAsync(
+            Guid residentId,
+            string worldUserRole,
+            CancellationToken ct)
+        {
+            var resident = await _context.Residents
+                .SingleOrDefaultAsync(b => b.Id == residentId, ct);
+            if (resident == null) throw new ArgumentException("Invalid resident id."); ;
+
+            resident.ModifiedAt = DateTimeOffset.UtcNow;
+            resident.WorldRole = worldUserRole;
+
+            var updated = await _context.SaveChangesAsync(ct);
+            if (updated < 1) throw new InvalidOperationException("Could not update the resident.");
+
+        }
+
     }
 }

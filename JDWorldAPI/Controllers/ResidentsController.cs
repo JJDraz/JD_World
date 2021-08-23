@@ -2,8 +2,6 @@
 using JDWorldAPI.Services;
 using JD_Hateoas.Models;
 using JD_Hateoas.Paging;
-using JD_Hateoas.Search;
-using JD_Hateoas.Sort;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Options;
@@ -83,23 +81,22 @@ namespace JDWorldAPI.Controllers
             Guid residentId,
             CancellationToken ct)
         {
-            var userId = await _userService.GetUserIdAsync(User);
-            if (userId == null) return NotFound();
+            var user = await _userService.GetUserAsync(User);
+            if (user == null) return NotFound();
 
-            ResidentRest resident;
-
-            var userCanSeeAllResidents = await _authzService.AuthorizeAsync(User, "ViewAllResidentsPolicy");
-            if (userCanSeeAllResidents.Succeeded)
-            {
-                resident = await _residentService.GetResidentAsync(residentId, ct);
-            }
-            else
-            {
-                resident = await _residentService.GetResidentForUserIdAsync(residentId, userId.Value, ct);
-            }
-			
+            var resident = await _residentService.GetResidentAsync(residentId, ct);
             if (resident == null) return NotFound();
 
+            var userCanSeeAllResidents = await _authzService.AuthorizeAsync(User, "ViewAllResidentsPolicy");
+            if (!userCanSeeAllResidents.Succeeded)
+            {
+                // Ooops missed WorldAdmin
+                var canViewInWorld = await _residentService.IsResidentWorldAdminAsync(user.Email, resident.WorldName, ct);
+                if ((!canViewInWorld) && (!resident.WorldUserEmail.Equals(user.Email)))
+                {
+                    return Unauthorized();
+                }
+            }
             return Ok(resident);
         }
 
@@ -109,8 +106,9 @@ namespace JDWorldAPI.Controllers
             Guid residentId,
             CancellationToken ct)
         {
+            var user = await _userService.GetUserAsync(User);
+            if (user == null) return NotFound();
             var userId = await _userService.GetUserIdAsync(User);
-            if (userId == null) return NotFound();
 
             var resident = await _residentService.GetResidentForUserIdAsync(residentId, userId.Value, ct);
             if (resident != null)
@@ -119,16 +117,58 @@ namespace JDWorldAPI.Controllers
                 return NoContent();
             }
 
-            var userCanSeeAllResidents = await _authzService.AuthorizeAsync(User, "ViewAllResidentsPolicy");
-            if (!userCanSeeAllResidents.Succeeded)
-            {
-                return NotFound();
-            }
-
             resident = await _residentService.GetResidentAsync(residentId, ct);
             if (resident == null) return NotFound();
 
+            var userCanSeeAllResidents = await _authzService.AuthorizeAsync(User, "ViewAllResidentsPolicy");
+            if (!userCanSeeAllResidents.Succeeded)
+            {
+                // Ooops. Missed checking for WorldAdmin.
+                var canDeleteInWorld = await _residentService.IsResidentWorldAdminAsync(user.Email, resident.WorldName, ct);
+                if (!canDeleteInWorld)
+                {
+                    return Unauthorized();
+                }
+            }
+
             await _residentService.DeleteResidentAsync(residentId, ct);
+            return NoContent();
+        }
+
+
+        // Ooops. Missed a patch sample.
+        [Authorize(AuthenticationSchemes = OpenIddict.Validation.AspNetCore.OpenIddictValidationAspNetCoreDefaults.AuthenticationScheme)]
+        [HttpPatch("{residentId}", Name = nameof(ToggleResidentRoleByIdAsync))]
+        public async Task<IActionResult> ToggleResidentRoleByIdAsync(
+            Guid residentId,
+            CancellationToken ct)
+        {
+            var user = await _userService.GetUserAsync(User);
+            if (user == null) return NotFound();
+
+            var resident = await _residentService.GetResidentAsync(residentId, ct);
+            if (resident == null) return NotFound();
+
+            var userCanSeeAllResidents = await _authzService.AuthorizeAsync(User, "ViewAllResidentsPolicy");
+            if (!userCanSeeAllResidents.Succeeded)
+            {
+                var canUpdateInWorld = await _residentService.IsResidentWorldAdminAsync(user.Email, resident.WorldName, ct);
+                if (!canUpdateInWorld)
+                {
+                    return Unauthorized();
+                }
+            }
+
+            string newRole;
+            if (resident.WorldRole.Equals("WorldAdmin"))
+            {
+                newRole = "Citizen";
+            } else
+            {
+                newRole = "WorldAdmin";
+            }
+
+            await _residentService.UpdateResidentRoleAsync(residentId, newRole, ct);
             return NoContent();
         }
     }
