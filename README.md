@@ -48,5 +48,5 @@ Residents Endpoint      https://localhost:44350/api/residents
 Swagger can be used for testing the endpoints.  But Postman (or something like it) will give you a much better appreciation for the HATEOAS linking and flow.  You can navigate the entire application with the only response links.
 
 #### About JD_Hateoas
-I created this class library when I first tried out .NET Core - way back at version 1.0.  It is based on [The Rest Ion Hypermedia Specification](https://ionspec.org/). I wrote all the code myself, but it is understandable if you do not want to rate my abilities on code I have been improving for years.
+Most applications do not use proper REST (Level 3).  This class library guarantees REST which in turn allows for behavioral functionality.
 
